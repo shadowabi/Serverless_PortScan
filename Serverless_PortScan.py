@@ -34,7 +34,7 @@ def main():
             if (ip == ""):
                 raise Exception("[-]ERROR DOMAIN OR IP!")
             target = serverless + "?ip=" + ip + "&port=" + str(i)
-            rs.append(grequests.get(target, timeout = 1, verify = False)) #扫描
+            rs.append(grequests.get(target, timeout = 3, verify = False)) #扫描
         print("The result of IP={}".format(ip))
         for i in grequests.map(rs):
             if i != None and i.text != "null" and i.text.find("errorCode") == -1:
