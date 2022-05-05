@@ -17,15 +17,19 @@ ap.add_argument("-u", "--url", help = "Input IP/DOMAIN/URL", metavar = "127.0.0.
 ap.add_argument("-p", "--port", help = "Input PORTS", metavar= "80,443", default = default_port)
 
 def check(ip):
+    flag = 0
     if(search(r"(http|https)\:\/\/", ip)): # 当输入URL时提取出域名
         ip = sub(r"(http|https)\:\/\/", "", ip)
         if (search(r"(\/|\\).*", ip)):
             ip = sub(r"(\/|\\).*", "", ip)
-    try:
-        res = socket.getaddrinfo(ip, None) # 若输入域名则提取IP
-        return(res[0][4][0])
-    except Exception as err: # 非法输入直接返回空值
+            
+    if match(r"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$", ip): #匹配IP
+        flag = 1
+    if match(r"^([a-zA-Z0-9]([a-zA-Z0-9-_]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,11}$", ip): #匹配域名
+        flag = 1
+    if flag == 0:
         return ""
+    return ip
 
 def main():
     rs = []
@@ -33,6 +37,8 @@ def main():
         for i in port_list:
             if (ip == ""):
                 raise Exception("[-]ERROR DOMAIN OR IP!")
+            if not i.isdigit():
+                raise Exception("[-]ERROR PORTS！")
             target = serverless + "?ip=" + ip + "&port=" + str(i)
             rs.append(grequests.get(target, timeout = 3, verify = False)) #扫描
         print("The result of IP={}".format(ip))
