@@ -11,7 +11,7 @@ import argparse
 
 serverless = "" #云函数地址
 port_list = []
-default_port = "21,22,23,25,80,135,139,443,445,888,1433,1521,3306,3389,5985,5986,6379,7001,8080,27019" #默认端口
+default_port = "21,22,23,25,80,81,135,139,443,445,888,1433,1521,3306,3389,5985,5986,6379,7001,8080,27019" #默认端口
 ap = argparse.ArgumentParser()
 ap.add_argument("-u", "--url", help = "Input IP/DOMAIN/URL", metavar = "127.0.0.1", required = True)
 ap.add_argument("-p", "--port", help = "Input PORTS", metavar= "80,443", default = default_port)
