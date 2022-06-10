@@ -8,12 +8,15 @@ from re import *
 from sys import argv
 import os
 import argparse
+from time import sleep
 
 serverless = "" #云函数地址
 port_list = []
-default_port = "21,22,23,25,80,81,135,139,443,445,888,1433,1521,3306,3389,5985,5986,6379,7001,8080,27019" #默认端口
+default_port = "21,22,23,25,80,135,139,443,445,888,1433,1521,3306,3389,5985,5986,6379,8080,27019" #默认端口
 ap = argparse.ArgumentParser()
-ap.add_argument("-u", "--url", help = "Input IP/DOMAIN/URL", metavar = "127.0.0.1", required = True)
+group = ap.add_mutually_exclusive_group()
+group.add_argument("-u", "--url", help = "Input IP/DOMAIN/URL", metavar = "127.0.0.1")
+group.add_argument("-f", "--file", help = "Input FILENAME", metavar = "1.txt")
 ap.add_argument("-p", "--port", help = "Input PORTS", metavar= "80,443", default = default_port)
 
 def check(ip):
@@ -28,10 +31,11 @@ def check(ip):
     if match(r"^([a-zA-Z0-9]([a-zA-Z0-9-_]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,11}$", ip): #匹配域名
         flag = 1
     if flag == 0:
-        return ""
-    return ip
+        ip = ""
 
-def main():
+    scan(ip)
+
+def scan(ip):
     rs = []
     try:
         for i in port_list:
@@ -39,24 +43,32 @@ def main():
                 raise Exception("[-]ERROR DOMAIN OR IP!")
             if not i.isdigit():
                 raise Exception("[-]ERROR PORTS！")
-            target = serverless + "?ip=" + ip + "&port=" + str(i)
-            rs.append(grequests.get(target, timeout = 3, verify = False)) #扫描
+            target2 = serverless + "?ip=" + ip + "&port=" + str(i)
+            rs.append(grequests.get(target2, timeout = 3, verify = False)) #扫描
         print("The result of IP={}".format(ip))
-        for i in grequests.map(rs):
-            if i != None and i.text != "null" and i.text.find("errorCode") == -1:
-                print('[+]{}/TCP OPEN.'.format(i.text.replace('\"',''))) #读取扫描结果，回显扫描成功的端口信息
+        for j in grequests.map(rs):
+            if j != None and j.text != "null" and j.text.find("errorCode") == -1:
+                print('[+]{}/TCP OPEN.'.format(j.text.replace('\"',''))) #读取扫描结果，回显扫描成功的端口信息
     except Exception as err:
         print(err)
         pass
     finally:
-        print("SCAN END!")
-        os._exit(0)
+        sleep(0.1)
+        rs.clear()
 
 if __name__ == '__main__':
     try:
         args = ap.parse_args()
-        ip = check(args.url)
         port_list = args.port.split(",")
-        main()
+        target = args.url or args.file
+        if args.file:
+            for i in open(target):
+                check(i.strip())
+                print("SCAN END!")
+        else:
+            check(target)
+            print("SCAN END!")
+        
+        os._exit(0)
     except Exception as err:
         print(err)
