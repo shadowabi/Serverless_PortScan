@@ -13,6 +13,7 @@ from time import sleep
 serverless = "" #云函数地址
 port_list = []
 default_port = "21,22,23,25,80,135,139,443,445,888,1433,1521,3306,3389,5985,5986,6379,8080,27019" #默认端口
+rs = [] #存放结果
 ap = argparse.ArgumentParser()
 group = ap.add_mutually_exclusive_group()
 group.add_argument("-u", "--url", help = "Input IP/DOMAIN/URL", metavar = "127.0.0.1")
@@ -36,7 +37,7 @@ def check(ip):
     scan(ip)
 
 def scan(ip):
-    rs = []
+    grs = []
     try:
         for i in port_list:
             if (ip == ""):
@@ -44,17 +45,18 @@ def scan(ip):
             if not i.isdigit():
                 raise Exception("[-]ERROR PORTS！")
             target2 = serverless + "?ip=" + ip + "&port=" + str(i)
-            rs.append(grequests.get(target2, timeout = 3, verify = False)) #扫描
+            grs.append(grequests.get(target2, timeout = 3, verify = False)) #扫描
         print("The result of IP={}".format(ip))
-        for j in grequests.map(rs):
+        for j in grequests.map(grs):
             if j != None and j.text != "null" and j.text.find("errorCode") == -1:
+                rs.append(ip + ":" + j.text.replace('\"',''))
                 print('[+]{}/TCP OPEN.'.format(j.text.replace('\"',''))) #读取扫描结果，回显扫描成功的端口信息
     except Exception as err:
         print(err)
         pass
     finally:
         sleep(0.1)
-        rs.clear()
+        grs.clear()
 
 if __name__ == '__main__':
     try:
@@ -64,11 +66,15 @@ if __name__ == '__main__':
         if args.file:
             for i in open(target):
                 check(i.strip())
-                print("SCAN END!")
         else:
             check(target)
-            print("SCAN END!")
         
+        print("SCAN END!")
+        with open("result.txt","w+",encoding='utf8') as f:
+            for i in rs:
+                f.write(i + "\n")
+        print("已保存到result.txt文件中，按回车键退出程序！")
+        input() 
         os._exit(0)
     except Exception as err:
         print(err)
