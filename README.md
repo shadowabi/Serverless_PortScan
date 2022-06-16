@@ -36,4 +36,4 @@ pip install -r requirements.txt
 
 
 # 用法  
-python Serverless_PortScan.py -u 127.0.0.1 -p 80,443
+python Serverless_PortScan.py [-h] [-u 127.0.0.1 | -f 1.txt] [-p 80,443]
