@@ -12,7 +12,7 @@ from time import sleep
 
 serverless = "" #云函数地址
 port_list = []
-default_port = "21,22,23,25,80,135,139,443,445,888,1433,1521,3306,3389,5985,5986,6379,8080,27019" #默认端口
+default_port = "21,22,23,25,80,135,139,443,445,888,1433,1521,3306,3389,5985,5986,6379,8000,8080,27019" #默认端口
 rs = [] #存放结果
 ap = argparse.ArgumentParser()
 group = ap.add_mutually_exclusive_group()
