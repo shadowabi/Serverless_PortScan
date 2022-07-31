@@ -1,9 +1,10 @@
 # Serverless_PortScan  
 利用云函数实现端口扫描
 
+## 配置
+打开config.py，配置云函数地址
 
-
-# 云函数配置  
+## 云函数配置  
 参考这篇文章：https://www.anquanke.com/post/id/261551
 
 或者将以下内容配置到云函数：
@@ -30,10 +31,10 @@ def main_handler(event, context):
 
 
 
-# 安装
+## 安装
 pip install -r requirements.txt
 
 
 
-# 用法  
+## 用法  
 python Serverless_PortScan.py [-h] [-u 127.0.0.1 | -f 1.txt] [-p 80,443]
