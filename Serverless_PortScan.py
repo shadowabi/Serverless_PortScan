@@ -10,6 +10,7 @@ import os
 import argparse
 from time import sleep
 from config import *
+import readline
 
 rs = [] #存放结果
 ap = argparse.ArgumentParser()
