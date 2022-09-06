@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-#author:Sh4d0w_小白
 
 serverless = "" #云函数地址
 port_list = []
