@@ -2,17 +2,15 @@
 # -*- coding:utf-8 -*-
 
 # import grequests
-import requests
-from requests.adapters import HTTPAdapter
+from requests import get
 import socket
 from re import *
 from sys import argv
 import os
 import argparse
-from time import sleep
+from time import sleep,time
 from config import *
 import readline
-from time import sleep
 from queue import Queue
 from threading import Thread
 import traceback
@@ -25,9 +23,6 @@ group.add_argument("-f", "--file", help = "Input FILENAME", metavar = "1.txt")
 ap.add_argument("-p", "--port", help = "Input PORTS", metavar= "80,443", default = default_port)
 
 q = Queue()
-s = requests.Session()
-s.mount('http://', HTTPAdapter(max_retries=3))
-s.mount('https://', HTTPAdapter(max_retries=3))
 
 def check():
     if(q.empty() == False):
@@ -53,7 +48,7 @@ def scan(ip):
         if (ip == ""):
             raise Exception("[-]ERROR DOMAIN OR IP!")
         target2 = serverless + "?ip=" + ip + "&port=" + port_list
-        response = s.get(target2, timeout = 5, verify = False)
+        response = get(target2, timeout = 5, verify = False)
         print("The result of IP={}".format(ip))
         if response.text and response.text != "\"\"":
             for i in response.text.split(","):
