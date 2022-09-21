@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-# import grequests
-from requests import get
+import grequests
+# from requests import get
 import socket
 from re import *
 from sys import argv
@@ -16,17 +16,16 @@ from threading import Thread
 import traceback
 
 rs = [] #存放结果
+url = [] #存放正确url
+grs = [] #存放扫描结果
 ap = argparse.ArgumentParser()
 group = ap.add_mutually_exclusive_group()
 group.add_argument("-u", "--url", help = "Input IP/DOMAIN/URL", metavar = "127.0.0.1")
 group.add_argument("-f", "--file", help = "Input FILENAME", metavar = "1.txt")
 ap.add_argument("-p", "--port", help = "Input PORTS", metavar= "80,443", default = default_port)
 
-q = Queue()
 
-def check():
-    if(q.empty() == False):
-        ip = q.get()
+def check(ip):
         flag = 0
         if(search(r"(http|https)\:\/\/", ip)): # 当输入URL时提取出域名
             ip = sub(r"(http|https)\:\/\/", "", ip)
@@ -34,32 +33,19 @@ def check():
                 ip = sub(r"(\/|\\).*", "", ip)
                 
         if match(r"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$", ip): #匹配IP
-            flag = 1
-        if match(r"^([a-zA-Z0-9]([a-zA-Z0-9-_]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,11}$", ip): #匹配域名
-            flag = 1
-        if flag == 0:
-            ip = ""
+            url.append(ip)
+        elif match(r"^([a-zA-Z0-9]([a-zA-Z0-9-_]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,11}$", ip): #匹配域名
+            url.append(ip)
 
-        scan(ip)
-
-def scan(ip):
-    grs = []
+def scan():
     try:
-        if (ip == ""):
-            raise Exception("[-]ERROR DOMAIN OR IP!")
-        target2 = serverless + "?ip=" + ip + "&port=" + port_list
-        response = get(target2, timeout = 5, verify = False)
-        print("The result of IP={}".format(ip))
-        if response.text and response.text != "\"\"":
-            for i in response.text.split(","):
-                rs.append(ip + ":" + i.replace('\"',''))
-                print('[+]{}/TCP OPEN.'.format(i.replace('\"',''))) #读取扫描结果，回显扫描成功的端口信息
+        for i in url:
+            target2 = serverless + "?ip=" + i + "&port=" + port_list
+            grs.append(grequests.get(target2, timeout = 5, verify = False))
     except Exception as err:
-        # traceback.print_exc()
+        traceback.print_exc()
         pass
-    finally:
-        sleep(0.1)
-        grs.clear()
+
 
 if __name__ == '__main__':
     try:
@@ -68,15 +54,22 @@ if __name__ == '__main__':
         target = args.url or args.file
         if args.file:
             for i in open(target):
-                q.put(i.strip())
+                check(i.strip())
         else:
-            q.put(target)
+            check(target.strip())
 
-        for i in range(20):
-            t = Thread(target = check)
-            # sleep(0.1)
-            t.start()
-            t.join()
+        if (url == []):
+            raise Exception("[-]ERROR DOMAIN OR IP!")
+        else:
+            scan()
+
+        a = grequests.map(grs)
+        for i in range(len(url)):
+            print("The result of IP={}".format(url[i]))
+            if a[i] != None and a[i].text != "\"\"":
+                for j in a[i].text.replace('\"','').split(","):
+                    rs.append(url[i] + ":" + j.replace('\"',''))
+                    print('[+]{}/TCP OPEN.'.format(j)) #读取扫描结果，回显扫描成功的端口信息
         
         print("SCAN END!")
         with open("result.txt","w+",encoding='utf8') as f:
