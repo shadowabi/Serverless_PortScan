@@ -5,7 +5,7 @@
 打开config.py，配置云函数地址
 
 ## 云函数配置  
-将以下内容配置到云函数：
+将以下内容配置到云函数,并建议将云函数执行时间和api网关后端超时设置为15秒或以上：
 
 ```python
 from socket import *
@@ -22,7 +22,8 @@ def Scan(ip):
         port = q.get()
         try:
             conn = socket(AF_INET,SOCK_STREAM)
-            conn.settimeout(0.1)
+            conn.settimeout(0.2)
+            # conn.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
             res = conn.connect_ex((str(ip),int(port)))
             if res == 0:
                 Tport =  Tport + "," + port
@@ -39,8 +40,9 @@ def main_handler(event, context):
 
     for i in ports:
         q.put(i)
-    for i in range(20):
+    for i in range(len(ports)):
         t = Thread(target = Scan, args = [ip])
+        # sleep(0.1)
         t.start()
         t.join()
     a = Tport[1:]
