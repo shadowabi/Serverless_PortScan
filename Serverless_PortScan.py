@@ -38,10 +38,12 @@ def check(ip):
             url.append(ip)
 
 def scan():
+    global url
+    url = list(set(url)) #去重
     try:
         for i in url:
             target2 = serverless + "?ip=" + i + "&port=" + port_list
-            grs.append(grequests.get(target2, timeout = 5, verify = False))
+            grs.append(grequests.get(target2, timeout = 15, verify = False))
     except Exception as err:
         traceback.print_exc()
         pass
