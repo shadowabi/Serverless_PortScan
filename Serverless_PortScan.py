@@ -11,8 +11,7 @@ import argparse
 from time import sleep,time
 from config import *
 import readline
-from queue import Queue
-from threading import Thread
+from concurrent.futures import ThreadPoolExecutor
 import traceback
 
 rs = [] #存放结果
@@ -54,11 +53,13 @@ if __name__ == '__main__':
         args = ap.parse_args()
         port_list = args.port
         target = args.url or args.file
-        if args.file:
-            for i in open(target):
-                check(i.strip())
-        else:
-            check(target.strip())
+
+        with ThreadPoolExecutor(max_workers = 20) as executor:
+            if args.file:
+                for i in open(target):
+                    executor.submit(check,i.strip())
+            else:
+                executor.submit(check,target.strip())
 
         if (url == []):
             raise Exception("[-]ERROR DOMAIN OR IP!")
@@ -74,7 +75,7 @@ if __name__ == '__main__':
                     print('[+]{}/TCP OPEN.'.format(j)) #读取扫描结果，回显扫描成功的端口信息
         
         print("SCAN END!")
-        with open("result.txt","w+",encoding='utf8') as f:
+        with open("result.txt", "w+", encoding = 'utf8') as f:
             for i in rs:
                 f.write(i + "\n")
         print("已保存到result.txt文件中，按回车键退出程序！")
