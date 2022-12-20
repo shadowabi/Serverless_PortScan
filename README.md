@@ -9,42 +9,34 @@
 
 ```python
 from socket import *
-from threading import Thread
-from queue import Queue
-from time import sleep
+from concurrent.futures import ThreadPoolExecutor
 
-q = Queue()
 Tport = ""
+ip = ""
+ports = ""
 
-def Scan(ip):
+def Scan(port):
     global Tport
-    if(q.empty() == False):
-        port = q.get()
-        try:
-            conn = socket(AF_INET,SOCK_STREAM)
-            conn.settimeout(0.2)
-            # conn.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
-            res = conn.connect_ex((str(ip),int(port)))
-            if res == 0:
-                Tport =  Tport + "," + port
-        except Exception as err:
-            print(err)
-        finally:
-            conn.close()
-            q.task_done()
+    try:
+        conn = socket(AF_INET,SOCK_STREAM)
+        conn.settimeout(1)
+        res = conn.connect_ex((str(ip),int(port)))
+        if res == 0:
+            Tport =  Tport + "," + port
+    except Exception as err:
+        print(err)
+    finally:
+        conn.close()
 
 def main_handler(event, context):
-    global Tport
+    global Tport,ip,ports
+
     ip = event["queryString"]["ip"]
     ports = event["queryString"]["port"].split(",")
 
-    for i in ports:
-        q.put(i)
-    for i in range(len(ports)):
-        t = Thread(target = Scan, args = [ip])
-        # sleep(0.1)
-        t.start()
-        t.join()
+    with ThreadPoolExecutor(max_workers = 20) as executor:
+        executor.map(Scan, ports)
+
     a = Tport[1:]
     Tport = ""
     return a
@@ -66,7 +58,7 @@ python Serverless_PortScan.py [-h] [-u 127.0.0.1 | -f 1.txt] [-p 80,443]
 ## 功能列表
 
 1. 利用云函数特性扫描端口，防止封ip
-2. 本地协程+云函数多线程发包，提高扫描速度
+2. 本地多线程、协程+云函数多线程发包，提高扫描速度
 3. 自动去重
 4. 文件输出时为：ip+端口号形式，方便利用其他工具如指纹识别工具进行扫描
 
