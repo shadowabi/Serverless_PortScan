@@ -64,8 +64,10 @@ if __name__ == '__main__':
         with ThreadPoolExecutor(max_workers = 20) as executor:
             if args.file:
                 with open(target) as f:
-                    lines = filter(lambda x: x.strip(), f)
-                    executor.map(Check, lines)
+                   # lines = filter(lambda x: x.strip(), f)
+                   # executor.map(Check, lines)
+                   for i in f.readlines():
+                       executor.submit(Check,i.strip())
             else:
                 executor.submit(Check,target.strip())
 
