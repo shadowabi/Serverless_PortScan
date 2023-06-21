@@ -42,7 +42,8 @@ def main_handler(event, context):
     return a
 ```
 
-
+触发管理配置如下：  
+![image](https://github.com/shadowabi/Serverless_PortScan/assets/50265741/899e0445-dd7c-4c2b-9bdd-26c248fa0eb6)
 
 
 ## 安装
