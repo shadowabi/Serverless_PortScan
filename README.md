@@ -52,14 +52,14 @@ def main_handler(event, context):
 
 
 ## 用法  
-Usage:
-  Serverless_PortScan [flags]
+Usage:  
+  Serverless_PortScan [flags]  
 
-Flags:
-  -f, --file string   从文件中读取目标地址 (Input FILENAME)
-  -h, --help          help for Serverless_PortScan
-  -p, --port string   从文件中读取网站地址 (Input FILENAME)
-  -u, --url string    输入目标地址 (Input IP/DOMAIN/URL)
+Flags:  
+  -f, --file string   从文件中读取目标地址 (Input FILENAME)  
+  -h, --help          help for Serverless_PortScan  
+  -p, --port string   从文件中读取网站地址 (Input FILENAME)  
+  -u, --url string    输入目标地址 (Input IP/DOMAIN/URL)  
 
 ## 功能列表
 
