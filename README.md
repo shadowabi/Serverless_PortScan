@@ -2,7 +2,7 @@
 利用云函数实现端口扫描
 
 ## 配置
-打开config.py，配置云函数地址
+打开config文件夹中的config.json，配置云函数地址，以及自定义默认扫描端口
 
 ## 云函数配置  
 将以下内容配置到云函数,并建议将云函数执行时间和api网关后端超时设置为15秒或以上：
@@ -47,14 +47,19 @@ def main_handler(event, context):
 
 
 ## 安装
-pip install -r requirements.txt
+下载release中的对应版本
 
 
 
 ## 用法  
-python Serverless_PortScan.py [-h] [-u 127.0.0.1 | -f 1.txt] [-p 80,443]
+Usage:
+  Serverless_PortScan [flags]
 
-
+Flags:
+  -f, --file string   从文件中读取目标地址 (Input FILENAME)
+  -h, --help          help for Serverless_PortScan
+  -p, --port string   从文件中读取网站地址 (Input FILENAME)
+  -u, --url string    输入目标地址 (Input IP/DOMAIN/URL)
 
 ## 功能列表
 
@@ -62,9 +67,4 @@ python Serverless_PortScan.py [-h] [-u 127.0.0.1 | -f 1.txt] [-p 80,443]
 2. 本地多线程、协程+云函数多线程发包，提高扫描速度
 3. 自动去重
 4. 文件输出时为：ip+端口号形式，方便利用其他工具如指纹识别工具进行扫描
-
-
-
-## 将要更新
-
-1. 采用go语言重构本程序
+5. 采用go语言编写，提升性能
