@@ -130,9 +130,14 @@ func Scan(port_list string) {
         }(*ip, &wg)
     }
     wg.Wait()
+    OutPut()
 }
 
 func OutPut() {
+    if len(rs) == 0 {
+        fmt.Println("[-] 目标端口均已关闭")
+        return
+    }
     file, err := os.OpenFile("./result.txt", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
     if err != nil {
         panic(err)
