@@ -40,7 +40,7 @@ func init() {
 	RootCmd.CompletionOptions.DisableDefaultCmd = true
 	RootCmd.Flags().StringVarP(&file, "file", "f", "", "从文件中读取目标地址 (Input FILENAME)")
 	RootCmd.Flags().StringVarP(&url, "url", "u", "", "输入目标地址 (Input IP/DOMAIN/URL)")
-	RootCmd.Flags().StringVarP(&port, "port", "p", exec.Config.Default_port , "从文件中读取网站地址 (Input FILENAME)")
+	RootCmd.Flags().StringVarP(&port, "port", "p", exec.Config.Default_port , "输入需要被扫描的端口，逗号分割 (Enter the port to be scanned, separated by commas (,))")
 }
 
 
