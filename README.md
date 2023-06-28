@@ -10,10 +10,12 @@
 ```python
 from socket import *
 from concurrent.futures import ThreadPoolExecutor
+import threading
 
 Tport = ""
 ip = ""
 ports = ""
+lock = threading.Lock()
 
 def Scan(port):
     global Tport
@@ -22,7 +24,8 @@ def Scan(port):
         conn.settimeout(1)
         res = conn.connect_ex((str(ip),int(port)))
         if res == 0:
-            Tport =  Tport + "," + port
+            with lock:
+                Tport =  Tport + "," + port
     except Exception as err:
         print(err)
     finally:
@@ -37,8 +40,9 @@ def main_handler(event, context):
     with ThreadPoolExecutor(max_workers = 20) as executor:
         executor.map(Scan, ports)
 
-    a = Tport[1:]
-    Tport = ""
+    with lock:
+        a = Tport[1:]
+        Tport = ""
     return a
 ```
 
