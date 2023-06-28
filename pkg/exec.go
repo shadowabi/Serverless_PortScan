@@ -46,6 +46,8 @@ func ReadConfig() {
 
 func CheckIP(ip string, wg *sync.WaitGroup) {
     defer wg.Done()
+    mu.Lock()
+    defer mu.Unlock()
 
     // 当输入Url时提取出域名
     re := regexp.MustCompile(`(http|https)\:\/\/`)
@@ -59,9 +61,8 @@ func CheckIP(ip string, wg *sync.WaitGroup) {
 
     // 匹配IP/域名
     if regexp.MustCompile(`^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$`).MatchString(ip) || regexp.MustCompile(`^([a-zA-Z0-9]([a-zA-Z0-9-_]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,11}$`).MatchString(ip) {
-        mu.Lock()
+        
         Url = append(Url, &ip)
-        mu.Unlock()
     }
 }
 
@@ -105,8 +106,12 @@ func Scan(port_list string) {
         wg.Add(1)
         go func(ip string,wg *sync.WaitGroup) {
             defer wg.Done()
+        
             target := Config.Serverless + "?ip=" + ip + "&port=" + port_list
-            resp, _ := client.Get(target)
+            resp, err := client.Get(target)
+            if err != nil {
+                return
+            }
             defer resp.Body.Close()
 
             if resp.Body != nil {
@@ -119,10 +124,10 @@ func Scan(port_list string) {
                 for _, port := range ports {
                     fmt.Println(fmt.Sprintf("[+] %s:%s TCP OPEN.", ip, strings.Trim(port,`"`)))
                     mu.Lock()
-                    rs = append(rs, ip + ":" + port)
                     mu.Unlock()
+                    rs = append(rs, ip + ":" + port)
+             
                 }
-
             } else {
                 return
             }
