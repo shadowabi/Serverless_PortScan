@@ -36,6 +36,7 @@ Serverless_PortScan is used to scan ports using cloud functions.
 
 
 func init() {
+	exec.ReadConfig()
 	RootCmd.CompletionOptions.DisableDefaultCmd = true
 	RootCmd.Flags().StringVarP(&file, "file", "f", "", "从文件中读取目标地址 (Input FILENAME)")
 	RootCmd.Flags().StringVarP(&url, "url", "u", "", "输入目标地址 (Input IP/DOMAIN/URL)")
@@ -46,7 +47,6 @@ func init() {
 func Execute(){
 	err := RootCmd.Execute()
 
-	exec.ReadConfig()
 	var wg sync.WaitGroup
     if url != "" {
     	wg.Add(1)

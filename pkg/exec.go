@@ -12,12 +12,20 @@ import (
     "time"
     "sort"
     "encoding/json"
+    "crypto/tls"
 )
 
 var (
     rs []string // 存放结果
     Url []*string // 存放正确Url，需传递
     Config Configure //存放配置文件，需传递
+    mu sync.Mutex
+    client = &http.Client{ //http.client
+        Timeout: 5 * time.Second,
+        Transport: &http.Transport{
+            TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+        },
+    }
 )
 
 type Configure struct {
@@ -49,16 +57,11 @@ func CheckIP(ip string, wg *sync.WaitGroup) {
         }
     }
 
-    // 匹配IP
-    re = regexp.MustCompile(`^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$`)
-    if re.MatchString(ip) {
+    // 匹配IP/域名
+    if regexp.MustCompile(`^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$`).MatchString(ip) || regexp.MustCompile(`^([a-zA-Z0-9]([a-zA-Z0-9-_]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,11}$`).MatchString(ip) {
+        mu.Lock()
         Url = append(Url, &ip)
-    }
-
-    // 匹配域名
-    re = regexp.MustCompile(`^([a-zA-Z0-9]([a-zA-Z0-9-_]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,11}$`)
-    if re.MatchString(ip) {
-        Url = append(Url, &ip)
+        mu.Unlock()
     }
 }
 
@@ -103,12 +106,6 @@ func Scan(port_list string) {
         go func(ip string,wg *sync.WaitGroup) {
             defer wg.Done()
             target := Config.Serverless + "?ip=" + ip + "&port=" + port_list
-
-            timeout := 5 * time.Second
-            client := http.Client{
-                Timeout: timeout,
-            }
-
             resp, _ := client.Get(target)
             defer resp.Body.Close()
 
@@ -121,7 +118,9 @@ func Scan(port_list string) {
                 ports := strings.Split(string(body), ",")
                 for _, port := range ports {
                     fmt.Println(fmt.Sprintf("[+] %s:%s TCP OPEN.", ip, strings.Trim(port,`"`)))
+                    mu.Lock()
                     rs = append(rs, ip + ":" + port)
+                    mu.Unlock()
                 }
 
             } else {
