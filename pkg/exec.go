@@ -34,20 +34,22 @@ type Configure struct {
 }
 
 func ReadConfig() {
-    data, err := ioutil.ReadFile("./config/config.json")
-    if err != nil {
-        fmt.Println("请配置config.json!")
-        os.Exit(1)
-    }
+    data, _ := ioutil.ReadFile("./config/config.json")
 
     // 解码 JSON 数据
-    json.Unmarshal(data, &Config)
+    err := json.Unmarshal(data, &Config)
+    if err != nil {
+        fmt.Println("config.json配置出错!")
+        os.Exit(1)
+    }
+    if Config.Serverless == "http://" {
+        fmt.Println("请配置config.json")
+        os.Exit(1)
+    }
 }
 
 func CheckIP(ip string, wg *sync.WaitGroup) {
     defer wg.Done()
-    mu.Lock()
-    defer mu.Unlock()
 
     // 当输入Url时提取出域名
     re := regexp.MustCompile(`(http|https)\:\/\/`)
@@ -61,8 +63,9 @@ func CheckIP(ip string, wg *sync.WaitGroup) {
 
     // 匹配IP/域名
     if regexp.MustCompile(`^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$`).MatchString(ip) || regexp.MustCompile(`^([a-zA-Z0-9]([a-zA-Z0-9-_]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,11}$`).MatchString(ip) {
-        
+        mu.Lock()
         Url = append(Url, &ip)
+        mu.Unlock()
     }
 }
 
@@ -92,7 +95,9 @@ func UniqueStrings(Urls []*string) []*string { //去重
         s := *Url
         if _, ok := seen[s]; !ok {
             seen[s] = true
+            mu.Lock()
             result = append(result, Url)
+            mu.Unlock()
         }
     }
     return result
@@ -124,8 +129,8 @@ func Scan(port_list string) {
                 for _, port := range ports {
                     fmt.Println(fmt.Sprintf("[+] %s:%s TCP OPEN.", ip, strings.Trim(port,`"`)))
                     mu.Lock()
+                    rs = append(rs, ip + ":" + strings.Trim(port,`"`))
                     mu.Unlock()
-                    rs = append(rs, ip + ":" + port)
              
                 }
             } else {
