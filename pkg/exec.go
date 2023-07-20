@@ -125,11 +125,11 @@ func Scan(port_list string) {
                     return
                 }
 
-                ports := strings.Split(string(body), ",")
+                ports := strings.Split(strings.Trim(string(body),`"`), ",")
                 for _, port := range ports {
-                    fmt.Println(fmt.Sprintf("[+] %s:%s TCP OPEN.", ip, strings.Trim(port,`"`)))
+                    fmt.Println(fmt.Sprintf("[+] %s:%s TCP OPEN.", ip, port))
                     mu.Lock()
-                    rs = append(rs, ip + ":" + strings.Trim(port,`"`))
+                    rs = append(rs, ip + ":" + port)
                     mu.Unlock()
              
                 }
