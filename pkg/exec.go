@@ -81,7 +81,6 @@ func ReadFile(filename string) {
         line := strings.TrimSpace(scan.Text())
         wg.Add(1)
         go CheckIP(line, &wg)
-        wg.Wait()
     }
     wg.Wait()
     file.Close()
