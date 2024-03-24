@@ -94,6 +94,6 @@ Flags:
 
 ## 旧版本
 
-python版本在pythono分支  
+python版本在python分支  
 
 旧的go版本在go-old
