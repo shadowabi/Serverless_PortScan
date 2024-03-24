@@ -23,7 +23,6 @@ jobs:
         
     - name: Install dependencies
       run: |
-          go get
           go mod tidy
     - name: Get Set
       run: |
