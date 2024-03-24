@@ -23,6 +23,7 @@ jobs:
         
     - name: Install dependencies
       run: |
+          go get
           go mod tidy
     - name: Get Set
       run: |
@@ -35,12 +36,12 @@ jobs:
 
     - name: Build LINUX
       run: |
-        env GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o Serverless_PortScan_linux_amd64 main.go
-        env GOOS=linux GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o Serverless_PortScan_linux_arm64 main.go
+        env GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o Serverless_PortScan_linux_amd64 main/main.go
+        env GOOS=linux GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o Serverless_PortScan_linux_arm64 main/main.go
     - name: Build WINDOWS
       run: |
-        env GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o Serverless_PortScan_windows_amd64.exe main.go
-        env GOOS=windows GOARCH=386 go build -trimpath -ldflags "-s -w" -o Serverless_PortScan_windows_386.exe main.go
+        env GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-s -w" -o Serverless_PortScan_windows_amd64.exe main/main.go
+        env GOOS=windows GOARCH=386 go build -trimpath -ldflags "-s -w" -o Serverless_PortScan_windows_386.exe main/main.go
     - name: Create Zip Archive
       run: |
         upx -9 Serverless_PortScan*
