@@ -63,6 +63,8 @@ def main_handler(event, context):
 ## 安装
 下载release中的对应版本
 
+使用Makefile进行编译
+
 
 ## 用法
 ```
