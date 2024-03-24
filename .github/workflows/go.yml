@@ -43,7 +43,6 @@ jobs:
         env GOOS=windows GOARCH=386 go build -trimpath -ldflags "-s -w" -o Serverless_PortScan_windows_386.exe main/main.go
     - name: Create Zip Archive
       run: |
-        upx -9 Serverless_PortScan*
         zip -r Serverless_PortScan_linux_amd64.zip Serverless_PortScan_linux_amd64
         zip -r Serverless_PortScan_linux_arm64.zip Serverless_PortScan_linux_arm64
         zip -r Serverless_PortScan_windows_amd64.zip Serverless_PortScan_windows_amd64.exe
