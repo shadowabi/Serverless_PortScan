@@ -18,6 +18,7 @@ func init() {
 	config.SpecificInit(configFile)
 	if config.C.ServerUrl == "http://" || config.C.ServerUrl == "" || config.C.PortList == "" {
 		Error.HandleFatal(errors.New("请配置config.json"))
+		return
 	}
 }
 
