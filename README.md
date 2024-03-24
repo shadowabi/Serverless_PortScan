@@ -1,10 +1,20 @@
-# Serverless_PortScan  
+# Serverless_PortScan
 利用云函数实现端口扫描
 
 ## 配置
-打开config文件夹中的config.json，配置云函数地址，以及自定义默认扫描端口
+当首次运行Serverless_PortScan时，会检测config.json文件是否存在，不存在则会自动创建
 
-## 云函数配置  
+config.json的填写内容应该如下：  
+```
+{
+    "ServerUrl":"http://",
+    "PortList":"21,22,23,25,80,135,139,389,443,445,873,888,1433,1521,2049,2181,2375,2379,3306,3389,3690,5432,5900,5985,5986,6379,6443,7001,8000,8061,8080,8089,8161,8500,8443,8649,8888,9080,10250,10255,11211,13389,16379,27017,27019,23791,30000,50070,63791"
+}
+```
+ServerUrl为你的云函数地址  
+
+
+## 云函数配置
 将以下内容配置到云函数,并建议将云函数执行时间和api网关后端超时设置为15秒或以上：
 
 ```python
@@ -54,21 +64,29 @@ def main_handler(event, context):
 下载release中的对应版本
 
 
-
-## 用法  
+## 用法
+```
 Usage:  
+
   Serverless_PortScan [flags]  
 
+
 Flags:  
-  -f, --file string   从文件中读取目标地址 (Input FILENAME)  
-  -h, --help          help for Serverless_PortScan  
-  -p, --port string   从文件中读取网站地址 (Input FILENAME)  
-  -u, --url string    输入目标地址 (Input IP/DOMAIN/URL)  
+
+  -f, --file string       从文件中读取目标地址 (Input filename)  
+  -h, --help              help for Serverless_PortScan  
+      --logLevel string   设置日志等级 (Set log level) [trace|debug|info|warn|error|fatal|panic] (default "info")  
+  -o, --output string     输入结果文件输出的位置 (Enter the location of the scan result output) (default "./result.txt")  
+  -p, --port string       输入需要被扫描的端口，逗号分割 (Enter the port to be scanned, separated by commas (,))  
+  -t, --timeout int       输入每个 http 请求的超时时间 (Enter the timeout period for every http request) (default 5)  
+  -u, --url string        输入目标地址 (Input [ip|domain|url]) 
+```
+
 
 ## 功能列表
 
 1. 利用云函数特性扫描端口，防止封ip
-2. 本地多线程、协程+云函数多线程发包，提高扫描速度
+2. 本地多线程+云函数多线程发包，提高扫描速度
 3. 自动去重
 4. 文件输出时为：ip+端口号形式，方便利用其他工具如指纹识别工具进行扫描
 5. 采用go语言编写，提升性能
@@ -76,4 +94,6 @@ Flags:
 
 ## 旧版本
 
-python版本在old分支  
+python版本在pythono分支  
+
+旧的go版本在go-old
