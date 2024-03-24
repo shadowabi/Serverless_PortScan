@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
           go get .
-          sudo apt install upx -y
+          go mod tidy
     - name: Get Set
       run: |
           go env -w GO111MODULE=on
