@@ -18,41 +18,45 @@ ServerUrl为你的云函数地址
 将以下内容配置到云函数,并建议将云函数执行时间和api网关后端超时设置为15秒或以上：
 
 ```python
-from socket import *
+import socket
 from concurrent.futures import ThreadPoolExecutor
+from collections import defaultdict
 import threading
 
-Tport = ""
+# 使用defaultdict存储每个线程找到的开放端口
+results_per_thread = defaultdict(list)
 ip = ""
 ports = ""
-lock = threading.Lock()
 
 def Scan(port):
-    global Tport
     try:
-        conn = socket(AF_INET,SOCK_STREAM)
+        conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         conn.settimeout(1)
-        res = conn.connect_ex((str(ip),int(port)))
+        res = conn.connect_ex((str(ip), int(port)))
         if res == 0:
-            with lock:
-                Tport =  Tport + "," + port
+            # 将结果添加到当前线程局部变量中
+            results_per_thread[threading.current_thread()].append(port)
     except Exception as err:
         print(err)
     finally:
         conn.close()
 
 def main_handler(event, context):
-    global Tport,ip,ports
-
+    global ip, ports
+    results_per_thread.clear()
     ip = event["queryString"]["ip"]
     ports = event["queryString"]["port"].split(",")
 
-    with ThreadPoolExecutor(max_workers = 20) as executor:
+    with ThreadPoolExecutor(max_workers=20) as executor:
         executor.map(Scan, ports)
 
-    with lock:
-        a = Tport[1:]
-        Tport = ""
+    # 合并所有线程的结果
+    open_ports = []
+    for thread_results in results_per_thread.values():
+        open_ports.extend(thread_results)
+
+    # 将端口列表转换为逗号分隔的字符串
+    a = ",".join(str(port) for port in open_ports)
     return a
 ```
 
