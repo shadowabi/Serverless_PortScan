@@ -20,7 +20,7 @@ var RootCmd = &cobra.Command{
 		" \\___ \\ / _ \\ '__\\ \\ / / _ \\ '__| |/ _ \\/ __/ __|   | |_) / _ \\| '__| __\\___ \\ / __/ _` | '_ \\ \n" +
 		"  ___) |  __/ |   \\ V /  __/ |  | |  __/\\__ \\__ \\   |  __/ (_) | |  | |_ ___) | (_| (_| | | | | \n" +
 		" |____/ \\___|_|    \\_/ \\___|_|  |_|\\___||___/___/___|_|   \\___/|_|   \\__|____/ \\___\\__,_|_| |_| " +
-		"                                               	  			|_____|                                          \n" +
+		"\n" +
 		` 
         github.com/shadowabi/Serverless_PortScan
 
@@ -39,6 +39,8 @@ Serverless_PortScan is used to scan ports using cloud functions.
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Println(cmd.Long) // print title
+
 		if define.Port == "" {
 			define.Port = config.C.PortList
 		}
@@ -55,6 +57,7 @@ Serverless_PortScan is used to scan ports using cloud functions.
 		reqList := pkg.ConvertToReqList(define.Port, hostList...)
 		resp := pkg.FetchPortData(client, reqList...)
 
+		cmd.Println("scan result:")
 		writeList := pkg.GetResult(resp...)
 		pkg.WriteToFile(writeList, define.OutPUT)
 	},

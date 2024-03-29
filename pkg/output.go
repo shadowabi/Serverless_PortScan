@@ -3,16 +3,20 @@ package pkg
 import (
 	"bufio"
 	"fmt"
-	"github.com/shadowabi/Serverless_PortScan_rebuild/utils/Error"
 	"os"
 	"sort"
 	"strings"
+
+	"github.com/shadowabi/Serverless_PortScan_rebuild/utils/Error"
 )
 
 func GetResult(respData ...ResponseData) (writeResultList []string) {
 	if len(respData) != 0 {
 		for _, data := range respData {
 			dataBody := strings.Trim(data.body, "\"")
+			if dataBody == "" {
+				continue
+			}
 			ports := strings.Split(dataBody, ",")
 			for _, port := range ports {
 				fmt.Println(fmt.Sprintf("[+] %s:%s TCP OPEN.", data.host, port))
