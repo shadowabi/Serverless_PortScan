@@ -49,7 +49,6 @@ def Scan(port):
 
 def main_handler(event, context):
     global ip, ports
-    results_per_thread.clear()
     ip = event["queryString"]["ip"]
     ports = event["queryString"]["port"].split(",")
 
@@ -63,6 +62,7 @@ def main_handler(event, context):
 
     # 将端口列表转换为逗号分隔的字符串
     a = ",".join(str(port) for port in open_ports)
+    results_per_thread.clear()
     return a
 ```
 
