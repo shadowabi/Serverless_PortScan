@@ -5,6 +5,7 @@ import (
 	net2 "github.com/shadowabi/Serverless_PortScan_rebuild/utils/net"
 	"net/http"
 	"sync"
+	"time"
 )
 
 type ResponseData struct {
@@ -21,6 +22,7 @@ func FetchPortData(client *http.Client, reqList ...ReqList) (respData []Response
 			go func(request ReqList, wg *sync.WaitGroup) {
 				defer wg.Done()
 				resp, err := client.Get(request.req)
+				time.Sleep(1500 * time.Millisecond)
 				Error.HandleError(err)
 				respBody := net2.HandleResponse(resp)
 				resp.Body.Close()
