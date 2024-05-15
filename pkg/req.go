@@ -16,25 +16,24 @@ type ResponseData struct {
 func FetchPortData(client *http.Client, reqList ...ReqList) (respData []ResponseData) {
 	if len(reqList) != 0 {
 		var wg sync.WaitGroup
-		respChan := make(chan ResponseData, len(reqList))
+		respChan := make(chan ResponseData, cap(reqList))
 		for _, request := range reqList {
 			wg.Add(1)
+			time.Sleep(100 * time.Millisecond)
 			go func(request ReqList, wg *sync.WaitGroup) {
 				defer wg.Done()
 				resp, err := client.Get(request.req)
-				time.Sleep(1500 * time.Millisecond)
 				Error.HandleError(err)
 				respBody := net2.HandleResponse(resp)
 				resp.Body.Close()
 				respChan <- ResponseData{request.host, respBody}
 			}(request, &wg)
+			go func() {
+				respData = append(respData, <-respChan)
+			}()
 		}
 		wg.Wait()
 		close(respChan)
-
-		for data := range respChan { // 从channel中收集结果
-			respData = append(respData, data)
-		}
 	}
 	return respData
 }
