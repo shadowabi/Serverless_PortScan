@@ -28,12 +28,12 @@ func FetchPortData(client *http.Client, reqList ...ReqList) (respData []Response
 				resp.Body.Close()
 				respChan <- ResponseData{request.host, respBody}
 			}(request, &wg)
-			go func() {
-				respData = append(respData, <-respChan)
-			}()
 		}
 		wg.Wait()
 		close(respChan)
+		for resp := range respChan {
+			respData = append(respData, resp)
+		}
 	}
 	return respData
 }
