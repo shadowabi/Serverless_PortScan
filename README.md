@@ -33,7 +33,7 @@ lock = threading.Lock()
 def Scan(port):
     try:
         conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        conn.settimeout(2)
+        conn.settimeout(3) # 3秒的话，大概1k端口47秒，2秒则是1k端口33秒，延时越大越不容易漏但时间越长
         res = conn.connect_ex((str(ip), int(port)))
         if res == 0:
             # 将结果添加到当前线程局部变量中
