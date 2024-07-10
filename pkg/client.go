@@ -2,9 +2,8 @@ package pkg
 
 import (
 	"crypto/tls"
-	"github.com/shadowabi/Serverless_PortScan_rebuild/utils/Error"
+	"github.com/shadowabi/Serverless_PortScan_rebuild/define"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -18,8 +17,7 @@ func GenerateHTTPClient(timeOut int) *http.Client {
 	return client
 }
 
-func GetPwd() (homePath string) {
-	homePath, err := os.Getwd()
-	Error.HandlePanic(err)
-	return homePath
+func IsEmptyConfig(c define.Configure) bool {
+	return c.ServerUrl == "" ||
+		c.PortList == ""
 }

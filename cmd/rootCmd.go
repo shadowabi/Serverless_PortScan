@@ -52,7 +52,7 @@ Serverless_PortScan is used to scan ports using cloud functions.
 		}
 
 		hostList = pkg.RemoveDuplicates(hostList)
-		client := pkg.GenerateHTTPClient(define.TimeOut * len(hostList)) // 动态分配 http 超时时间
+		client := pkg.GenerateHTTPClient(define.TimeOut) // 动态分配 http 超时时间
 
 		reqList := pkg.ConvertToReqList(define.Port, hostList...)
 		resp := pkg.FetchPortData(client, reqList...)
@@ -71,7 +71,7 @@ func init() {
 	RootCmd.Flags().StringVarP(&define.File, "file", "f", "", "从文件中读取目标地址 (Input filename)")
 	RootCmd.Flags().StringVarP(&define.Url, "url", "u", "", "输入目标地址 (Input [ip|domain|url])")
 	RootCmd.Flags().StringVarP(&define.Port, "port", "p", "", "输入需要被扫描的端口，逗号分割 (Enter the port to be scanned, separated by commas (,))")
-	RootCmd.Flags().IntVarP(&define.TimeOut, "timeout", "t", 5, "输入每个 http 请求的超时时间 (Enter the timeout period for every http request)")
+	RootCmd.Flags().IntVarP(&define.TimeOut, "timeout", "t", 900, "输入每个 http 请求的超时时间 (Enter the timeout period for every http request)")
 	RootCmd.Flags().StringVarP(&define.OutPUT, "output", "o", "./result.txt", "输入结果文件输出的位置 (Enter the location of the scan result output)")
 }
 

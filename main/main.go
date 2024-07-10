@@ -1,27 +1,22 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"github.com/shadowabi/Serverless_PortScan_rebuild/cmd"
 	"github.com/shadowabi/Serverless_PortScan_rebuild/config"
 	"github.com/shadowabi/Serverless_PortScan_rebuild/pkg"
 	"github.com/shadowabi/Serverless_PortScan_rebuild/utils/Error"
-	"github.com/shadowabi/Serverless_PortScan_rebuild/utils/File"
-	"strings"
 )
 
 func init() {
-	configFile := pkg.GetPwd()
-	configFile = strings.Join([]string{configFile, "/config.json"}, "")
-	err := File.FileNonExistCreate(configFile)
-	Error.HandleFatal(err)
-	config.SpecificInit(configFile)
-	if config.C.ServerUrl == "http://" || config.C.ServerUrl == "" || config.C.PortList == "" {
-		Error.HandleFatal(errors.New("请配置config.json"))
-		return
-	}
+	config.InitConfigure("config.yaml")
 }
 
 func main() {
+	if pkg.IsEmptyConfig(config.C) {
+		Error.HandleFatal(fmt.Errorf("请配置 config.yaml"))
+		return
+	}
+
 	cmd.Execute()
 }

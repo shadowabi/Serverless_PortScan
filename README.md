@@ -3,25 +3,21 @@
 
 ## 安装
 
-下载release中的二进制文件使用
+下载 release 中的二进制文件使用
 
-或使用Makefile进行编译二进制文件后使用
+或使用 Makefile 进行编译二进制文件后使用
 
 ## 配置
-当首次运行Serverless_PortScan时，会检测config.json文件是否存在，不存在则会自动创建
+当首次运行 Serverless_PortScan 时，会检测 config.yaml 文件是否存在，不存在则会自动创建
 
-config.json的填写内容应该如下：  
-```
-{
-    "ServerUrl":"http://",
-    "PortList":"21,22,23,25,80,135,139,389,443,445,1433,1521,3306,3389"
-}
-```
-ServerUrl为你的云函数地址，PortList为默认扫描的端口列表
-
+config.yaml 中的 ServerUrl 需要在云函数配置好后才能配置，请看下面：
 
 ## 云函数配置
-将以下内容配置到云函数,并建议将云函数执行时间和api网关后端超时设置为15秒或以上：
+控制台搜索云函数，进入云函数控制台后，新建函数
+![img.png](img.png)
+点击从头开始，选择事件函数，运行环境选择python3.x（都可以）
+![img_1.png](img_1.png)
+在函数代码中中复制粘贴下面的代码：
 
 ```python
 import socket
@@ -32,27 +28,44 @@ import threading
 # 使用defaultdict存储每个线程找到的开放端口
 results_per_thread = defaultdict(list)
 ip = ""
-ports = ""
+lock = threading.Lock()
 
 def Scan(port):
     try:
         conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        conn.settimeout(1)
+        conn.settimeout(2)
         res = conn.connect_ex((str(ip), int(port)))
         if res == 0:
             # 将结果添加到当前线程局部变量中
+            lock.acquire()
             results_per_thread[threading.current_thread()].append(port)
+            lock.release()
     except Exception as err:
         print(err)
     finally:
         conn.close()
 
 def main_handler(event, context):
-    global ip, ports
-    ip = event["queryString"]["ip"]
-    ports = event["queryString"]["port"].split(",")
+    global ip
+    
+    try:
+        ip = event["queryString"]["ip"]
+        port_str = event["queryString"]["port"]
+        path = event["path"]
+        if path != "/portscan" :
+            return
+    except:
+        return event
 
-    with ThreadPoolExecutor(max_workers=20) as executor:
+    ports = []
+    for port_range in port_str.split(","):
+        if "-" in port_range:
+            start, end = map(int, port_range.split("-"))
+            ports.extend(range(start, end+1))
+        else:
+            ports.append(int(port_range))
+
+    with ThreadPoolExecutor(max_workers=30) as executor:
         executor.map(Scan, ports)
 
     # 合并所有线程的结果
@@ -62,13 +75,30 @@ def main_handler(event, context):
 
     # 将端口列表转换为逗号分隔的字符串
     a = ",".join(str(port) for port in open_ports)
+    
     results_per_thread.clear()
     return a
 ```
+![img_2.png](img_2.png)
+往下拉，点击高级配置，设置执行超时时间为 900 秒，也可以自定义一个时间。内存选择 384MB 或以下即可(如果扫描端口过多会爆内存)
+![img_4.png](img_4.png)
+基础配置如上，最后勾选“我已阅读并同意 《腾讯云云函数网络服务协议》”，点击完成。
 
-触发管理配置如下：  
-![image](https://github.com/shadowabi/Serverless_PortScan/assets/50265741/899e0445-dd7c-4c2b-9bdd-26c248fa0eb6)
-
+创建完毕后，会弹出下面界面：
+![img_5.png](img_5.png)
+点留在本页，然后点函数URL，创建URL，启用公网访问
+![img_6.png](img_6.png)
+![img_7.png](img_7.png)
+点击提交后，会生成一个地址
+![img_8.png](img_8.png)
+例如这里：
+```
+https://1304875526-enqewmqsrf-hk.scf.tencentcs.com
+```
+在 URL 地址最后拼接上 /portscan，配置到 config.yaml 中的 ServerUrl，即
+```
+ServerUrl: https://1304875526-enqewmqsrf-hk.scf.tencentcs.com/portscan
+```
 
 
 ## 用法
@@ -85,22 +115,22 @@ Flags:
       --logLevel string   设置日志等级 (Set log level) [trace|debug|info|warn|error|fatal|panic] (default "info")  
   -o, --output string     输入结果文件输出的位置 (Enter the location of the scan result output) (default "./result.txt")  
   -p, --port string       输入需要被扫描的端口，逗号分割 (Enter the port to be scanned, separated by commas (,))  
-  -t, --timeout int       输入每个 http 请求的超时时间 (Enter the timeout period for every http request) (default 5)  
+  -t, --timeout int       输入每个 http 请求的超时时间 (Enter the timeout period for every http request) (default 900)  
   -u, --url string        输入目标地址 (Input [ip|domain|url]) 
 ```
 
 
 ## 功能列表
 
-1. 利用云函数特性扫描端口，防止封ip
-2. 本地多线程+云函数多线程发包，提高扫描速度
+1. 利用云函数特性扫描端口，防止封 ip
+2. 本地多线程 + 云函数多线程发包，提高扫描速度
 3. 自动去重
-4. 文件输出时为：ip+端口号形式，方便利用其他工具如指纹识别工具进行扫描
-5. 采用go语言编写，提升性能
+4. 文件输出时为：ip + 端口号形式，方便利用其他工具如指纹识别工具进行扫描
+5. 采用 go 语言编写，提升性能
 
 
 ## 旧版本
 
-python版本在python分支  
+python 版本在 python 分支  
 
-旧的go版本在go-old
+旧的 go 版本在 go-old
