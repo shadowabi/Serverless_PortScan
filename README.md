@@ -14,9 +14,9 @@ config.yaml 中的 ServerUrl 需要在云函数配置好后才能配置，请看
 
 ## 云函数配置
 控制台搜索云函数，进入云函数控制台后，新建函数
-![img.png](img.png)
+![img](https://github.com/shadowabi/Serverless_PortScan/assets/50265741/a7eed0d2-7ccc-4eb3-9acf-a4166bf57ab7)
 点击从头开始，选择事件函数，运行环境选择python3.x（都可以）
-![img_1.png](img_1.png)
+![img_1](https://github.com/shadowabi/Serverless_PortScan/assets/50265741/555cfd63-5a5a-40a1-9d15-4ee5d791c6ff)
 在函数代码中中复制粘贴下面的代码：
 
 ```python
@@ -79,18 +79,18 @@ def main_handler(event, context):
     results_per_thread.clear()
     return a
 ```
-![img_2.png](img_2.png)
+![img_2](https://github.com/shadowabi/Serverless_PortScan/assets/50265741/2b17267a-484b-4642-a58a-fa87eabe3a9e)
 往下拉，点击高级配置，设置执行超时时间为 900 秒，也可以自定义一个时间。内存选择 384MB 或以下即可(如果扫描端口过多会爆内存)
-![img_4.png](img_4.png)
+![img_3](https://github.com/shadowabi/Serverless_PortScan/assets/50265741/862006a0-cbe5-4d8b-a1e3-200bdf164160)
 基础配置如上，最后勾选“我已阅读并同意 《腾讯云云函数网络服务协议》”，点击完成。
 
 创建完毕后，会弹出下面界面：
-![img_5.png](img_5.png)
+![img_5](https://github.com/shadowabi/Serverless_PortScan/assets/50265741/f1774aa3-586d-43f4-862e-28d3aa6203ee)
 点留在本页，然后点函数URL，创建URL，启用公网访问
-![img_6.png](img_6.png)
-![img_7.png](img_7.png)
+![img_6](https://github.com/shadowabi/Serverless_PortScan/assets/50265741/6d084286-226f-45af-9156-faf2dee413f7)
+![img_7](https://github.com/shadowabi/Serverless_PortScan/assets/50265741/e64147a9-23cc-40c9-bc81-8694768b086e)
 点击提交后，会生成一个地址
-![img_8.png](img_8.png)
+![img_8](https://github.com/shadowabi/Serverless_PortScan/assets/50265741/26f1917f-066f-46e3-8d90-219af185a127)
 例如这里：
 ```
 https://1304875526-enqewmqsrf-hk.scf.tencentcs.com
