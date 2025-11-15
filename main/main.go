@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/shadowabi/Serverless_PortScan_rebuild/cmd"
 	"github.com/shadowabi/Serverless_PortScan_rebuild/config"
 	"github.com/shadowabi/Serverless_PortScan_rebuild/pkg"
@@ -18,5 +19,6 @@ func main() {
 		return
 	}
 
+	fmt.Println(cmd.RootCmd.Long)
 	cmd.Execute()
 }

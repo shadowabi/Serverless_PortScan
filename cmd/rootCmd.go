@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"errors"
+	"os"
+	"runtime"
+
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/shadowabi/Serverless_PortScan_rebuild/config"
 	"github.com/shadowabi/Serverless_PortScan_rebuild/define"
@@ -9,7 +12,6 @@ import (
 	"github.com/shadowabi/Serverless_PortScan_rebuild/utils/Error"
 	"github.com/shadowabi/Serverless_PortScan_rebuild/utils/log"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var RootCmd = &cobra.Command{
@@ -29,6 +31,8 @@ Serverless_PortScan is used to scan ports using cloud functions.
 `,
 	PersistentPostRun: func(cmd *cobra.Command, args []string) {
 		log.Init(logLevel)
+	},
+	Run: func(cmd *cobra.Command, args []string) {
 		if define.Url != "" && define.File != "" {
 			Error.HandleFatal(errors.New("参数不可以同时存在"))
 			return
@@ -37,9 +41,6 @@ Serverless_PortScan is used to scan ports using cloud functions.
 			Error.HandleFatal(errors.New("必选参数为空，请输入 -u 参数或 -f 参数"))
 			return
 		}
-	},
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Println(cmd.Long) // print title
 
 		if define.Port == "" {
 			define.Port = config.C.PortList
@@ -76,14 +77,16 @@ func init() {
 }
 
 func Execute() {
-	cc.Init(&cc.Config{
-		RootCmd:  RootCmd,
-		Headings: cc.HiGreen + cc.Underline,
-		Commands: cc.Cyan + cc.Bold,
-		Example:  cc.Italic,
-		ExecName: cc.Bold,
-		Flags:    cc.Cyan + cc.Bold,
-	})
+	if runtime.GOOS != "windows" {
+		cc.Init(&cc.Config{
+			RootCmd:  RootCmd,
+			Headings: cc.HiGreen + cc.Underline,
+			Commands: cc.Cyan + cc.Bold,
+			Example:  cc.Italic,
+			ExecName: cc.Bold,
+			Flags:    cc.Cyan + cc.Bold,
+		})
+	}
 	err := RootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
